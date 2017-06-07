@@ -53,11 +53,12 @@ class Import
 
     private function importDayEntry(\pgddevil\Tools\Harvest\Model\DayEntry $sourceEntry)
     {
+        $user = $this->importUser($sourceEntry->userId);
+        $task = $this->importTask($sourceEntry->taskId);
+        $project = $this->importProject($sourceEntry->projectId);
+
         $entry = $this->getDayEntry($sourceEntry->id);
         if ($entry == null) {
-            $user = $this->importUser($sourceEntry->userId);
-            $task = $this->importTask($sourceEntry->taskId);
-            $project = $this->importProject($sourceEntry->projectId);
 
             $entry = new DayEntry();
             $entry->setId($sourceEntry->id);
@@ -231,7 +232,16 @@ class Import
         $user->setId($sourceUser->id);
         $user->setName($sourceUser->firstName . " " . $sourceUser->lastName);
         $user->setEmail($sourceUser->email);
-        $user->setDepartment($sourceUser->department);
+
+        if (!empty($sourceUser->department)) {
+            $segments = explode(' - ',$sourceUser->department, 2);
+            if (count($segments) > 1) {
+                $user->setDepartment(trim($segments[0]));
+                $user->setTeam(trim($segments[1]));
+            } else {
+                $user->setDepartment($sourceUser->department);
+            }
+        }
 
         $this->targetGateway->persist($user);
 

@@ -31,6 +31,12 @@ class User
     private $department;
 
     /**
+     * @var string
+     * @Column(type="string", length=255, nullable=true)
+     */
+    private $team;
+
+    /**
      * @return int
      */
     public function getId()
@@ -92,6 +98,22 @@ class User
     public function setDepartment($department)
     {
         $this->department = $department;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTeam()
+    {
+        return $this->team;
+    }
+
+    /**
+     * @param string $team
+     */
+    public function setTeam($team)
+    {
+        $this->team = $team;
     }
 
 
