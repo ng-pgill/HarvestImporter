@@ -25,6 +25,12 @@ class User
     private $name;
 
     /**
+     * @var string
+     * @Column(type="string", length=255, nullable=true)
+     */
+    private $department;
+
+    /**
      * @return int
      */
     public function getId()
@@ -70,6 +76,22 @@ class User
     public function setName($name)
     {
         $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDepartment()
+    {
+        return $this->department;
+    }
+
+    /**
+     * @param string $department
+     */
+    public function setDepartment($department)
+    {
+        $this->department = $department;
     }
 
 

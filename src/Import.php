@@ -3,6 +3,7 @@
 namespace pgddevil\Tools\HarvestImporter;
 
 use Doctrine\ORM\EntityManager;
+use pgddevil\Tools\Harvest\Client;
 use pgddevil\Tools\HarvestImporter\Model\DayEntry;
 use pgddevil\Tools\HarvestImporter\Model\Task;
 use pgddevil\Tools\HarvestImporter\Model\User;
@@ -106,6 +107,46 @@ class Import
     }
 
     /**
+     * @param $id
+     * @return null|Client
+     */
+    private function getClient($id) {
+        return $this->targetGateway->find(\pgddevil\Tools\HarvestImporter\Model\Client::class, $id);
+    }
+
+    /**
+     * @param int $id
+     * @return Client
+     */
+    private function importClient($id)
+    {
+        $client = $this->getClient($id);
+        if ($client == null) {
+            $sourceClient = $this->sourceGateway->getClient($id);
+            $client = $this->createClient($sourceClient);
+            $this->logger->info("Client created: {$client->getName()}");
+        } else {
+            $this->logger->debug("Client already exists: {$client->getName()}");
+        }
+
+        return $client;
+    }
+
+    /**
+     * @param \pgddevil\Tools\Harvest\Model\ClientEntry $sourceClient
+     * @return Client
+     */
+    private function createClient(\pgddevil\Tools\Harvest\Model\ClientEntry $sourceClient)
+    {
+        $client = new \pgddevil\Tools\HarvestImporter\Model\Client();
+        $client->setId($sourceClient->id);
+        $client->setName($sourceClient->name);
+        $this->targetGateway->persist($client);
+
+        return $client;
+    }
+
+    /**
      * @param int $projectId
      * @return Project
      */
@@ -114,6 +155,8 @@ class Import
         $project = $this->getProject($projectId);
         if ($project == null) {
             $sourceProject = $this->sourceGateway->getProject($projectId);
+            $this->importClient($sourceProject->clientId);
+
             $project = $this->createProject($sourceProject);
             $this->logger->info("Project created: {$project->getName()}");
         } else {
@@ -188,6 +231,8 @@ class Import
         $user->setId($sourceUser->id);
         $user->setName($sourceUser->firstName . " " . $sourceUser->lastName);
         $user->setEmail($sourceUser->email);
+        $user->setDepartment($sourceUser->department);
+
         $this->targetGateway->persist($user);
 
         return $user;

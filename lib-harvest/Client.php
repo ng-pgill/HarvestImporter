@@ -2,6 +2,7 @@
 
 namespace pgddevil\Tools\Harvest;
 
+use pgddevil\Tools\Harvest\Model\ClientEntry;
 use pgddevil\Tools\Harvest\Model\ProjectEntry;
 use pgddevil\Tools\Harvest\Model\DayEntry;
 use pgddevil\Tools\Harvest\Model\TaskEntry;
@@ -62,7 +63,7 @@ class Client
 
     /**
      * @param int $projectId
-     * @return Project
+     * @return ProjectEntry
      */
     public function getProject($projectId)
     {
@@ -135,6 +136,30 @@ class Client
     }
 
     /**
+     * @param int $id
+     * @return ClientEntry
+     */
+    public function getClient($id)
+    {
+        $response = $this->requester->getRequest($this->getHarvestUrl("/clients/{$id}"));
+        $jsonResult = json_decode($response, true);
+        $entry = $this->loadClientEntry($jsonResult);
+        return $entry;
+    }
+
+    /**
+     * @param $data
+     * @return ClientEntry
+     */
+    private function loadClientEntry($data)
+    {
+        $entry = new ClientEntry();
+        $entry->id = $data['client']['id'];
+        $entry->name = $data['client']['name'];
+        return $entry;
+    }
+
+    /**
      * @return \Iterator
      */
     public function getActiveTasks()
@@ -169,6 +194,8 @@ class Client
         $entry->email = $jsonEntry['user']['email'];
         $entry->firstName = $jsonEntry['user']['first_name'];
         $entry->lastName = $jsonEntry['user']['last_name'];
+        $entry->department = $jsonEntry['user']['department'];
+
         return $entry;
     }
 
