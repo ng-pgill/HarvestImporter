@@ -5,6 +5,7 @@ namespace pgddevil\Tools\HarvestImporter;
 use Doctrine\ORM\EntityManager;
 use pgddevil\Tools\HarvestImporter\Model\DayEntry;
 use pgddevil\Tools\HarvestImporter\Model\Task;
+use pgddevil\Tools\HarvestImporter\Model\User;
 use Psr\Log\LoggerInterface;
 
 class Import
@@ -32,6 +33,7 @@ class Import
 
     public function import(\DateTimeImmutable $fromDate, \DateTimeImmutable $toDate)
     {
+        $this->importUsers();
         $this->importProjects();
         $this->importTasks();
         $this->importDayEntries($fromDate, $toDate);
@@ -164,9 +166,6 @@ class Import
         return $project;
     }
 
-    /**
-     * @param \pgddevil\Tools\Harvest\Client $sourceGateway
-     */
     private function importProjects()
     {
         $this->logger->info("Importing projects...");
@@ -193,5 +192,51 @@ class Import
 
         $this->targetGateway->flush();
         $this->logger->info("Importing tasks - completed");
+    }
+
+    private function importUsers()
+    {
+        $this->logger->info("Importing users...");
+        $sourceUsers = $this->sourceGateway->getActiveUsers();
+        foreach ($sourceUsers as $sourceUser) {
+            /** @var \pgddevil\Tools\Harvest\Model\UserEntry $sourceUser */
+
+            $this->importUser($sourceUser);
+        }
+
+        $this->targetGateway->flush();
+        $this->logger->info("Importing users - completed");
+    }
+
+    private function importUser(\pgddevil\Tools\Harvest\Model\UserEntry $sourceUser)
+    {
+        $user = $this->getUser($sourceUser->id);
+        if ($user == null) {
+            $user = $this->createUser($sourceUser);
+            $this->logger->info("User created: {$sourceUser->firstName} {$sourceUser->lastName}");
+        } else {
+            $this->logger->debug("User already exists: {$sourceUser->firstName} {$sourceUser->lastName}");
+        }
+
+        return $user;
+    }
+
+    /**
+     * @param $id
+     * @return null|User
+     */
+    private function getUser($id) {
+        return $this->targetGateway->find(\pgddevil\Tools\HarvestImporter\Model\User::class, $id);
+    }
+
+    private function createUser(\pgddevil\Tools\Harvest\Model\UserEntry $sourceUser)
+    {
+        $user = new \pgddevil\Tools\HarvestImporter\Model\User();
+        $user->setId($sourceUser->id);
+        $user->setName($sourceUser->firstName . " " . $sourceUser->lastName);
+        $user->setEmail($sourceUser->email);
+        $this->targetGateway->persist($user);
+
+        return $user;
     }
 }

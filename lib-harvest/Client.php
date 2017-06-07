@@ -25,11 +25,28 @@ class Client
         return json_decode($response, true);
     }
 
-    public function getProject($projectId)
+    /**
+     * @return \Iterator
+     */
+    public function getActiveUsers()
     {
-        $response = $this->requester->getRequest($this->getHarvestUrl( "/projects/{$projectId}"));
-        $result = json_decode($response, true);
-        return $result;
+        $response = $this->requester->getRequest($this->getHarvestUrl( "/people"));
+
+        $jsonResult = json_decode($response, true);
+        $result = array();
+        foreach ($jsonResult as $jsonEntry) {
+            if ($jsonEntry['user']['is_active']) {
+                $entry = new Model\UserEntry();
+                $entry->id = $jsonEntry['user']['id'];
+                $entry->email = $jsonEntry['user']['email'];
+                $entry->firstName = $jsonEntry['user']['first_name'];
+                $entry->lastName = $jsonEntry['user']['last_name'];
+
+                $result[] = $entry;
+            }
+        }
+        return new \ArrayIterator($result);
+
     }
 
     /**
