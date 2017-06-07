@@ -1,0 +1,11 @@
+{
+  "require": {
+    "doctrine/orm": "^2.5",
+    "psr/log": "^1.0",
+    "monolog/monolog": "^1.22"
+  },
+  "autoload": {
+    "psr-4": {"pgddevil\\Tools\\Harvest\\": "lib-harvest/",
+              "pgddevil\\Tools\\HarvestImporter\\":"src/"}
+  }
+}
