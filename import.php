@@ -2,6 +2,11 @@
 
 require_once (__DIR__ . '/bootstrap.php');
 
+$log = new Monolog\Logger('import');
+$log->pushHandler(new Monolog\Handler\StreamHandler('php://stdout', Monolog\Logger::INFO));
+
+$entityManager = initDoctrine($config->DBConnection, false);
+
 $completionFile = __DIR__ . "/last_completion.txt";
 
 if ($argc >= 2 && $argv[1] !== '.') {
@@ -18,15 +23,10 @@ if ($argc >= 3) {
     $toDate = new \DateTimeImmutable("now");
 }
 
-$log = new Monolog\Logger('import');
-$log->pushHandler(new Monolog\Handler\StreamHandler('php://stdout', Monolog\Logger::INFO));
-
 $requester = new \pgddevil\Tools\Harvest\BasicAuthRequester($config->harvestCredentials['username'], $config->harvestCredentials['password']);
 $client = new \pgddevil\Tools\Harvest\Client($config->harvestAccountName, $requester);
 
 $importer = new \pgddevil\Tools\HarvestImporter\Import($client, $entityManager, $log);
-
-$log->notice("Importing entries between {$fromDate->format('Y-m-d')} and {$toDate->format('Y-m-d')} inclusive");
 $importer->import($fromDate, $toDate);
 
 file_put_contents($completionFile, $toDate->format('Y-m-d'));

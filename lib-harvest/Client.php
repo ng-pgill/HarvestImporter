@@ -5,6 +5,7 @@ namespace pgddevil\Tools\Harvest;
 use pgddevil\Tools\Harvest\Model\ProjectEntry;
 use pgddevil\Tools\Harvest\Model\DayEntry;
 use pgddevil\Tools\Harvest\Model\TaskEntry;
+use pgddevil\Tools\Harvest\Model\UserEntry;
 
 class Client
 {
@@ -26,6 +27,20 @@ class Client
     }
 
     /**
+     * @param int $userId
+     * @return UserEntry
+     */
+    public function getUser($userId)
+    {
+        $response = $this->requester->getRequest($this->getHarvestUrl( "/people/{$userId}"));
+
+        $jsonResult = json_decode($response, true);
+        $entry = $this->loadUserEntry($jsonResult);
+
+        return $entry;
+    }
+
+    /**
      * @return \Iterator
      */
     public function getActiveUsers()
@@ -36,17 +51,26 @@ class Client
         $result = array();
         foreach ($jsonResult as $jsonEntry) {
             if ($jsonEntry['user']['is_active']) {
-                $entry = new Model\UserEntry();
-                $entry->id = $jsonEntry['user']['id'];
-                $entry->email = $jsonEntry['user']['email'];
-                $entry->firstName = $jsonEntry['user']['first_name'];
-                $entry->lastName = $jsonEntry['user']['last_name'];
+                $entry = $this->loadUserEntry($jsonEntry);
 
                 $result[] = $entry;
             }
         }
         return new \ArrayIterator($result);
 
+    }
+
+    /**
+     * @param int $projectId
+     * @return Project
+     */
+    public function getProject($projectId)
+    {
+        $response = $this->requester->getRequest($this->getHarvestUrl( "/projects/{$projectId}"));
+
+        $jsonResult = json_decode($response, true);
+        $entry = $this->loadProjectEntry($jsonResult);
+        return $entry;
     }
 
     /**
@@ -60,10 +84,7 @@ class Client
         $result = array();
         foreach ($jsonResult as $projectData) {
             if ($projectData['project']['active']) {
-                $entry = new ProjectEntry();
-                $entry->id = $projectData['project']['id'];
-                $entry->name = $projectData['project']['name'];
-                $entry->clientId = $projectData['project']['client_id'];
+                $entry = $this->loadProjectEntry($projectData);
 
                 $result[] = $entry;
             }
@@ -102,6 +123,18 @@ class Client
     }
 
     /**
+     * @param int $taskId
+     * @return TaskEntry
+     */
+    public function getTask($taskId)
+    {
+        $response = $this->requester->getRequest($this->getHarvestUrl("/tasks/{$taskId}"));
+        $jsonResult = json_decode($response, true);
+        $entry = $this->loadTaskEntry($jsonResult);
+        return $entry;
+    }
+
+    /**
      * @return \Iterator
      */
     public function getActiveTasks()
@@ -112,9 +145,7 @@ class Client
         $result = array();
         foreach ($jsonResult as $taskData) {
             if (!$taskData['task']['deactivated']) {
-                $entry = new TaskEntry();
-                $entry->id = $taskData['task']['id'];
-                $entry->name = $taskData['task']['name'];
+                $entry = $this->loadTaskEntry($taskData);
 
                 $result[] = $entry;
             }
@@ -125,5 +156,44 @@ class Client
     private function getHarvestUrl($path)
     {
         return "https://{$this->accountName}.harvestapp.com{$path}";
+    }
+
+    /**
+     * @param $jsonEntry
+     * @return UserEntry
+     */
+    private function loadUserEntry($jsonEntry)
+    {
+        $entry = new Model\UserEntry();
+        $entry->id = $jsonEntry['user']['id'];
+        $entry->email = $jsonEntry['user']['email'];
+        $entry->firstName = $jsonEntry['user']['first_name'];
+        $entry->lastName = $jsonEntry['user']['last_name'];
+        return $entry;
+    }
+
+    /**
+     * @param $taskData
+     * @return TaskEntry
+     */
+    private function loadTaskEntry($taskData)
+    {
+        $entry = new TaskEntry();
+        $entry->id = $taskData['task']['id'];
+        $entry->name = $taskData['task']['name'];
+        return $entry;
+    }
+
+    /**
+     * @param $projectData
+     * @return ProjectEntry
+     */
+    private function loadProjectEntry($projectData)
+    {
+        $entry = new ProjectEntry();
+        $entry->id = $projectData['project']['id'];
+        $entry->name = $projectData['project']['name'];
+        $entry->clientId = $projectData['project']['client_id'];
+        return $entry;
     }
 }

@@ -8,4 +8,5 @@ class UserEntry
     public $email;
     public $firstName;
     public $lastName;
+    public $department;
 }

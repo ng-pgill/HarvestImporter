@@ -33,15 +33,7 @@ class Import
 
     public function import(\DateTimeImmutable $fromDate, \DateTimeImmutable $toDate)
     {
-        $this->importUsers();
-        $this->importProjects();
-        $this->importTasks();
-        $this->importDayEntries($fromDate, $toDate);
-    }
-
-    private function importDayEntries(\DateTimeImmutable $fromDate, \DateTimeImmutable $toDate)
-    {
-        $this->logger->info("Importing day entries...");
+        $this->logger->notice("Importing entries between {$fromDate->format('Y-m-d')} and {$toDate->format('Y-m-d')} inclusive");
 
         $sourceProjects = $this->sourceGateway->getActiveProjects();
         foreach ($sourceProjects as $sourceProject) {
@@ -55,20 +47,24 @@ class Import
             $this->targetGateway->flush();
         }
 
-        $this->logger->info("Importing day entries - completed");
+        $this->logger->info("import completed!");
     }
 
     private function importDayEntry(\pgddevil\Tools\Harvest\Model\DayEntry $sourceEntry)
     {
         $entry = $this->getDayEntry($sourceEntry->id);
         if ($entry == null) {
+            $user = $this->importUser($sourceEntry->userId);
+            $task = $this->importTask($sourceEntry->taskId);
+            $project = $this->importProject($sourceEntry->projectId);
+
             $entry = new DayEntry();
             $entry->setId($sourceEntry->id);
             $entry->setHours($sourceEntry->hours);
             $entry->setNotes($sourceEntry->notes);
-            $entry->setProjectId($sourceEntry->projectId);
-            $entry->setTaskId($sourceEntry->taskId);
-            $entry->setUserId($sourceEntry->userId);
+            $entry->setProjectId($project->getId());
+            $entry->setTaskId($task->getId());
+            $entry->setUserId($user->getId());
             $entry->setSpentAt($sourceEntry->spentAt);
 
             $this->targetGateway->persist($entry);
@@ -85,23 +81,6 @@ class Import
      */
     private function getDayEntry($id) {
         return $this->targetGateway->find(DayEntry::class, $id);
-    }
-
-    /**
-     * @param \pgddevil\Tools\Harvest\Model\TaskEntry $sourceTask
-     * @return Task
-     */
-    private function importTask(\pgddevil\Tools\Harvest\Model\TaskEntry $sourceTask)
-    {
-        $task = $this->getTask($sourceTask->id);
-        if ($task == null) {
-            $task = $this->createTask($sourceTask);
-            $this->logger->info("Task created: {$sourceTask->name}");
-        } else {
-            $this->logger->debug("Task already exists: {$sourceTask->name}");
-        }
-
-        return $task;
     }
 
     /**
@@ -127,17 +106,18 @@ class Import
     }
 
     /**
-     * @param \pgddevil\Tools\Harvest\Model\ProjectEntry $sourceProject
+     * @param int $projectId
      * @return Project
      */
-    private function importProject(\pgddevil\Tools\Harvest\Model\ProjectEntry $sourceProject)
+    private function importProject($projectId)
     {
-        $project = $this->getProject($sourceProject->id);
+        $project = $this->getProject($projectId);
         if ($project == null) {
+            $sourceProject = $this->sourceGateway->getProject($projectId);
             $project = $this->createProject($sourceProject);
-            $this->logger->info("Project created: {$sourceProject->name}");
+            $this->logger->info("Project created: {$project->getName()}");
         } else {
-            $this->logger->debug("Project already exists: {$sourceProject->name}");
+            $this->logger->debug("Project already exists: {$project->getName()}");
         }
 
         return $project;
@@ -166,56 +146,29 @@ class Import
         return $project;
     }
 
-    private function importProjects()
+    private function importTask($taskId)
     {
-        $this->logger->info("Importing projects...");
-        $sourceProjects = $this->sourceGateway->getActiveProjects();
-        foreach ($sourceProjects as $sourceProject) {
-            /** @var \pgddevil\Tools\Harvest\Model\ProjectEntry $sourceProject */
-
-            $this->importProject($sourceProject);
-        }
-
-        $this->targetGateway->flush();
-        $this->logger->info("Importing projects - completed");
-    }
-
-    private function importTasks()
-    {
-        $this->logger->info("Importing tasks...");
-        $sourceTasks = $this->sourceGateway->getActiveTasks();
-        foreach ($sourceTasks as $sourceTask) {
-            /** @var \pgddevil\Tools\Harvest\Model\TaskEntry $sourceTask */
-
-            $this->importTask($sourceTask);
-        }
-
-        $this->targetGateway->flush();
-        $this->logger->info("Importing tasks - completed");
-    }
-
-    private function importUsers()
-    {
-        $this->logger->info("Importing users...");
-        $sourceUsers = $this->sourceGateway->getActiveUsers();
-        foreach ($sourceUsers as $sourceUser) {
-            /** @var \pgddevil\Tools\Harvest\Model\UserEntry $sourceUser */
-
-            $this->importUser($sourceUser);
-        }
-
-        $this->targetGateway->flush();
-        $this->logger->info("Importing users - completed");
-    }
-
-    private function importUser(\pgddevil\Tools\Harvest\Model\UserEntry $sourceUser)
-    {
-        $user = $this->getUser($sourceUser->id);
-        if ($user == null) {
-            $user = $this->createUser($sourceUser);
-            $this->logger->info("User created: {$sourceUser->firstName} {$sourceUser->lastName}");
+        $task = $this->getTask($taskId);
+        if ($task == null) {
+            $sourceTask = $this->sourceGateway->getTask($taskId);
+            $task = $this->createTask($sourceTask);
+            $this->logger->info("Task created: {$task->getName()}");
         } else {
-            $this->logger->debug("User already exists: {$sourceUser->firstName} {$sourceUser->lastName}");
+            $this->logger->debug("Task already exists: {$task->getName()}");
+        }
+
+        return $task;
+    }
+
+    private function importUser($userId)
+    {
+        $user = $this->getUser($userId);
+        if ($user == null) {
+            $sourceUser = $this->sourceGateway->getUser($userId);
+            $user = $this->createUser($sourceUser);
+            $this->logger->info("User created: {$user->getName()}");
+        } else {
+            $this->logger->debug("User already exists: {$user->getName()}");
         }
 
         return $user;
