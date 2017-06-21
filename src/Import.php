@@ -59,9 +59,11 @@ class Import
 
         $entry = $this->getDayEntry($sourceEntry->id);
         if ($entry == null) {
-
             $entry = new DayEntry();
             $entry->setId($sourceEntry->id);
+        }
+
+        if ($entry->getHours() != $sourceEntry->hours) {
             $entry->setHours($sourceEntry->hours);
             $entry->setNotes($sourceEntry->notes);
             $entry->setProjectId($project->getId());
