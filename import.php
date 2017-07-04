@@ -6,6 +6,7 @@ $log = new Monolog\Logger('import');
 $log->pushHandler(new Monolog\Handler\StreamHandler('php://stdout', Monolog\Logger::INFO));
 
 $entityManager = initDoctrine($config->DBConnection, false);
+// $entityManager->getConfiguration()->setSQLLogger(new \Doctrine\DBAL\Logging\EchoSQLLogger());
 
 $completionFile = __DIR__ . "/last_completion.txt";
 

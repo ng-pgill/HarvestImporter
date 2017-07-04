@@ -9,4 +9,6 @@ class UserEntry
     public $firstName;
     public $lastName;
     public $department;
+    public $createdAt;
+    public $updatedAt;
 }

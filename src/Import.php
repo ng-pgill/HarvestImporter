@@ -61,15 +61,17 @@ class Import
         if ($entry == null) {
             $entry = new DayEntry();
             $entry->setId($sourceEntry->id);
+            $entry->setCreatedAt($sourceEntry->createdAt);
         }
 
-        if ($entry->getHours() != $sourceEntry->hours) {
+        if ($entry->getUpdatedAt() === null || $entry->getUpdatedAt() != $sourceEntry->updatedAt) {
             $entry->setHours($sourceEntry->hours);
             $entry->setNotes($sourceEntry->notes);
             $entry->setProjectId($project->getId());
             $entry->setTaskId($task->getId());
             $entry->setUserId($user->getId());
             $entry->setSpentAt($sourceEntry->spentAt);
+            $entry->setUpdatedAt($sourceEntry->updatedAt);
 
             $this->targetGateway->persist($entry);
 
@@ -96,17 +98,19 @@ class Import
     }
 
     /**
-     * @param \pgddevil\Tools\Harvest\Model\TaskEntry $sourceTask
+     * @param \pgddevil\Tools\Harvest\Model\TaskEntry $source
      * @return \pgddevil\Tools\HarvestImporter\Model\Task
      */
-    private function createTask(\pgddevil\Tools\Harvest\Model\TaskEntry $sourceTask)
+    private function createTask(\pgddevil\Tools\Harvest\Model\TaskEntry $source)
     {
-        $task = new \pgddevil\Tools\HarvestImporter\Model\Task();
-        $task->setId($sourceTask->id);
-        $task->setName($sourceTask->name);
-        $this->targetGateway->persist($task);
+        $target = new \pgddevil\Tools\HarvestImporter\Model\Task();
+        $target->setId($source->id);
+        $target->setName($source->name);
+        $target->setCreatedAt($source->createdAt);
+        $target->setUpdatedAt($source->updatedAt);
+        $this->targetGateway->persist($target);
 
-        return $task;
+        return $target;
     }
 
     /**
@@ -136,17 +140,20 @@ class Import
     }
 
     /**
-     * @param \pgddevil\Tools\Harvest\Model\ClientEntry $sourceClient
+     * @param \pgddevil\Tools\Harvest\Model\ClientEntry $source
      * @return Client
      */
-    private function createClient(\pgddevil\Tools\Harvest\Model\ClientEntry $sourceClient)
+    private function createClient(\pgddevil\Tools\Harvest\Model\ClientEntry $source)
     {
-        $client = new \pgddevil\Tools\HarvestImporter\Model\Client();
-        $client->setId($sourceClient->id);
-        $client->setName($sourceClient->name);
-        $this->targetGateway->persist($client);
+        $target = new \pgddevil\Tools\HarvestImporter\Model\Client();
+        $target->setId($source->id);
+        $target->setName($source->name);
+        $target->setCreatedAt($source->createdAt);
+        $target->setUpdatedAt($source->updatedAt);
 
-        return $client;
+        $this->targetGateway->persist($target);
+
+        return $target;
     }
 
     /**
@@ -178,18 +185,21 @@ class Import
     }
 
     /**
-     * @param \pgddevil\Tools\Harvest\Model\ProjectEntry $sourceProject
+     * @param \pgddevil\Tools\Harvest\Model\ProjectEntry $source
      * @return Project
      */
-    private function createProject(\pgddevil\Tools\Harvest\Model\ProjectEntry $sourceProject)
+    private function createProject(\pgddevil\Tools\Harvest\Model\ProjectEntry $source)
     {
-        $project = new \pgddevil\Tools\HarvestImporter\Model\Project();
-        $project->setId($sourceProject->id);
-        $project->setName($sourceProject->name);
-        $project->setClientId($sourceProject->clientId);
-        $this->targetGateway->persist($project);
+        $target = new \pgddevil\Tools\HarvestImporter\Model\Project();
+        $target->setId($source->id);
+        $target->setName($source->name);
+        $target->setClientId($source->clientId);
+        $target->setCreatedAt($source->createdAt);
+        $target->setUpdatedAt($source->updatedAt);
 
-        return $project;
+        $this->targetGateway->persist($target);
+
+        return $target;
     }
 
     private function importTask($taskId)
@@ -228,25 +238,27 @@ class Import
         return $this->targetGateway->find(\pgddevil\Tools\HarvestImporter\Model\User::class, $id);
     }
 
-    private function createUser(\pgddevil\Tools\Harvest\Model\UserEntry $sourceUser)
+    private function createUser(\pgddevil\Tools\Harvest\Model\UserEntry $source)
     {
-        $user = new \pgddevil\Tools\HarvestImporter\Model\User();
-        $user->setId($sourceUser->id);
-        $user->setName($sourceUser->firstName . " " . $sourceUser->lastName);
-        $user->setEmail($sourceUser->email);
+        $target = new \pgddevil\Tools\HarvestImporter\Model\User();
+        $target->setId($source->id);
+        $target->setName($source->firstName . " " . $source->lastName);
+        $target->setEmail($source->email);
 
-        if (!empty($sourceUser->department)) {
-            $segments = explode(' - ',$sourceUser->department, 2);
+        if (!empty($source->department)) {
+            $segments = explode(' - ',$source->department, 2);
             if (count($segments) > 1) {
-                $user->setDepartment(trim($segments[0]));
-                $user->setTeam(trim($segments[1]));
+                $target->setDepartment(trim($segments[0]));
+                $target->setTeam(trim($segments[1]));
             } else {
-                $user->setDepartment($sourceUser->department);
+                $target->setDepartment($source->department);
             }
         }
+        $target->setCreatedAt($source->createdAt);
+        $target->setUpdatedAt($source->updatedAt);
 
-        $this->targetGateway->persist($user);
+        $this->targetGateway->persist($target);
 
-        return $user;
+        return $target;
     }
 }

@@ -108,16 +108,7 @@ class Client
         $jsonResult = json_decode($response, true);
         $result = array();
         foreach ($jsonResult as $entryData) {
-            $entry = new DayEntry();
-            $entry->id = $entryData['day_entry']['id'];
-            $entry->hours = $entryData['day_entry']['hours'];
-            $entry->notes = $entryData['day_entry']['notes'];
-            $entry->projectId = $entryData['day_entry']['project_id'];
-            $entry->taskId = $entryData['day_entry']['task_id'];
-            $entry->userId = $entryData['day_entry']['user_id'];
-            $entry->spentAt = new \DateTimeImmutable($entryData['day_entry']['spent_at']);
-
-            $result[] = $entry;
+            $result[] = $this->loadTimeEntry($entryData);
         }
 
         return new \ArrayIterator($result);
@@ -148,18 +139,6 @@ class Client
     }
 
     /**
-     * @param $data
-     * @return ClientEntry
-     */
-    private function loadClientEntry($data)
-    {
-        $entry = new ClientEntry();
-        $entry->id = $data['client']['id'];
-        $entry->name = $data['client']['name'];
-        return $entry;
-    }
-
-    /**
      * @return \Iterator
      */
     public function getActiveTasks()
@@ -184,43 +163,95 @@ class Client
     }
 
     /**
-     * @param $jsonEntry
+     * @param $sourceData
+     * @return ClientEntry
+     */
+    private function loadClientEntry($sourceData)
+    {
+        $source = $sourceData['client'];
+
+        $entry = new ClientEntry();
+        $entry->id = $source['id'];
+        $entry->name = $source['name'];
+        $entry->createdAt = new \DateTimeImmutable($source['created_at']);
+        $entry->updatedAt = new \DateTimeImmutable($source['updated_at']);
+
+        return $entry;
+    }
+
+    /**
+     * @param $sourceData
      * @return UserEntry
      */
-    private function loadUserEntry($jsonEntry)
+    private function loadUserEntry($sourceData)
     {
+        $source = $sourceData['user'];
+
         $entry = new Model\UserEntry();
-        $entry->id = $jsonEntry['user']['id'];
-        $entry->email = $jsonEntry['user']['email'];
-        $entry->firstName = $jsonEntry['user']['first_name'];
-        $entry->lastName = $jsonEntry['user']['last_name'];
-        $entry->department = $jsonEntry['user']['department'];
+        $entry->id = $source['id'];
+        $entry->email = $source['email'];
+        $entry->firstName = $source['first_name'];
+        $entry->lastName = $source['last_name'];
+        $entry->department = $source['department'];
+        $entry->createdAt = new \DateTimeImmutable($source['created_at']);
+        $entry->updatedAt = new \DateTimeImmutable($source['updated_at']);
 
         return $entry;
     }
 
     /**
-     * @param $taskData
+     * @param $sourceData
      * @return TaskEntry
      */
-    private function loadTaskEntry($taskData)
+    private function loadTaskEntry($sourceData)
     {
+        $source = $sourceData['task'];
+
         $entry = new TaskEntry();
-        $entry->id = $taskData['task']['id'];
-        $entry->name = $taskData['task']['name'];
+        $entry->id = $source['id'];
+        $entry->name = $source['name'];
+        $entry->createdAt = new \DateTimeImmutable($source['created_at']);
+        $entry->updatedAt = new \DateTimeImmutable($source['updated_at']);
         return $entry;
     }
 
     /**
-     * @param $projectData
+     * @param $sourceData
      * @return ProjectEntry
      */
-    private function loadProjectEntry($projectData)
+    private function loadProjectEntry($sourceData)
     {
+        $source = $sourceData['project'];
+
         $entry = new ProjectEntry();
-        $entry->id = $projectData['project']['id'];
-        $entry->name = $projectData['project']['name'];
-        $entry->clientId = $projectData['project']['client_id'];
+        $entry->id = $source['id'];
+        $entry->name = $source['name'];
+        $entry->clientId = $source['client_id'];
+        $entry->createdAt = new \DateTimeImmutable($source['created_at']);
+        $entry->updatedAt = new \DateTimeImmutable($source['updated_at']);
+
+        return $entry;
+    }
+
+    /**
+     * @param $sourceData
+     * @return DayEntry
+     */
+    private function loadTimeEntry($sourceData)
+    {
+        $source = $sourceData['day_entry'];
+
+        $entry = new DayEntry();
+        $entry->id = $source['id'];
+        $entry->hours = $source['hours'];
+        $entry->notes = $source['notes'];
+        $entry->projectId = $source['project_id'];
+        $entry->taskId = $source['task_id'];
+        $entry->userId = $source['user_id'];
+        $entry->spentAt = new \DateTimeImmutable($source['spent_at']);
+        $entry->createdAt = new \DateTimeImmutable($source['created_at']);
+        $entry->updatedAt = new \DateTimeImmutable($source['updated_at']);
+
         return $entry;
     }
 }

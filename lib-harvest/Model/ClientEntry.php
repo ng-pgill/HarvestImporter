@@ -6,4 +6,6 @@ class ClientEntry
 {
     public $id;
     public $name;
+    public $createdAt;
+    public $updatedAt;
 }

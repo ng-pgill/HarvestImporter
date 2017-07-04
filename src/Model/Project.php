@@ -24,6 +24,17 @@ class Project
      */
     private $clientId;
 
+    /**
+     * @var \DateTimeImmutable
+     * @Column(type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTimeImmutable
+     * @Column(type="datetime")
+     */
+    private $updatedAt;
 
     /**
      * @return int
@@ -72,5 +83,38 @@ class Project
     {
         $this->name = $name;
     }
+
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTimeImmutable $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTimeImmutable $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
 
 }

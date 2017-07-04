@@ -37,6 +37,18 @@ class User
     private $team;
 
     /**
+     * @var \DateTimeImmutable
+     * @Column(type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTimeImmutable
+     * @Column(type="datetime")
+     */
+    private $updatedAt;
+
+    /**
      * @return int
      */
     public function getId()
@@ -114,6 +126,38 @@ class User
     public function setTeam($team)
     {
         $this->team = $team;
+    }
+
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTimeImmutable $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTimeImmutable $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
     }
 
 

@@ -11,4 +11,6 @@ class DayEntry
     public $taskId;
     public $userId;
     public $spentAt;
+    public $createdAt;
+    public $updatedAt;
 }

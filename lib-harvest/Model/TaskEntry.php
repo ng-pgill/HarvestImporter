@@ -6,4 +6,6 @@ class TaskEntry
 {
     public $id;
     public $name;
+    public $createdAt;
+    public $updatedAt;
 }

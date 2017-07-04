@@ -17,25 +17,25 @@ class DayEntry
      * @var double
      * @Column(type="float")
      */
-    public $hours;
+    private $hours;
 
     /**
      * @var string
      * @Column(type="string",nullable=true,length=500)
      */
-    public $notes;
+    private $notes;
 
     /**
      * @var int
      * @Column(type="integer")
      */
-    public $projectId;
+    private $projectId;
 
     /**
      * @var int
      * @Column(type="integer")
      */
-    public $taskId;
+    private $taskId;
 
     /**
      * @var int
@@ -47,7 +47,19 @@ class DayEntry
      * @var \DateTimeImmutable
      * @Column(type="datetime")
      */
-    public $spentAt;
+    private $spentAt;
+
+    /**
+     * @var \DateTimeImmutable
+     * @Column(type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTimeImmutable
+     * @Column(type="datetime")
+     */
+    private $updatedAt;
 
     /**
      * @return int
@@ -159,6 +171,38 @@ class DayEntry
     public function setSpentAt($spentAt)
     {
         $this->spentAt = $spentAt;
+    }
+
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTimeImmutable $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTimeImmutable $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
     }
 
 
