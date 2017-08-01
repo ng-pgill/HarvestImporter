@@ -75,9 +75,9 @@ class Import
 
             $this->targetGateway->persist($entry);
 
-            $this->logger->info("Import Entry: {$sourceEntry->spentAt->format('Y-m-d')}, {$sourceEntry->id}");
+            $this->logger->info("Import Entry: {$user->getName()}, {$sourceEntry->spentAt->format('Y-m-d')}, {$sourceEntry->id}");
         } else {
-            $this->logger->debug("Entry already exists: {$sourceEntry->spentAt->format('Y-m-d')}, {$sourceEntry->id}");
+            $this->logger->debug("Entry already exists: {$user->getName()}, {$sourceEntry->spentAt->format('Y-m-d')}, {$sourceEntry->id}");
         }
     }
 
