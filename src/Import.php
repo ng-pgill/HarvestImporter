@@ -1,4 +1,19 @@
 <?php
+/*
+             DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 2, December 2004
+
+ Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+ */
 
 namespace pgddevil\Tools\HarvestImporter;
 
@@ -75,9 +90,9 @@ class Import
 
             $this->targetGateway->persist($entry);
 
-            $this->logger->info("Import Entry: {$user->getName()}, {$sourceEntry->spentAt->format('Y-m-d')}, {$sourceEntry->id}");
+            $this->logger->info("Import Entry: {$sourceEntry->spentAt->format('Y-m-d')}, {$user->getName()}, {$sourceEntry->id}, {$project->getName()}/{$task->getName()}");
         } else {
-            $this->logger->debug("Entry already exists: {$user->getName()}, {$sourceEntry->spentAt->format('Y-m-d')}, {$sourceEntry->id}");
+            $this->logger->debug("Entry already exists: {$sourceEntry->spentAt->format('Y-m-d')}, {$user->getName()}, {$sourceEntry->id}");
         }
     }
 
